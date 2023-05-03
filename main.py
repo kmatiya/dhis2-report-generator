@@ -9,8 +9,6 @@ from pihmalawi_config import config
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     http_report_service = HttpReportService(config)
-    folder_creator = FolderCreator(config=config)
-    folder_creator.create_report_folders()
     print("Creating report Folders successfully")
     print("Pulling reports from server has started")
     http_report_service.get_reports_from_server()
