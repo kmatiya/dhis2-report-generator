@@ -12,34 +12,37 @@ class HttpReportService:
     def get_location_for_all_endpoints(self):
         locations = []
         for each_endpoint in self.__config["endpoints"]:
-            for each_location in each_endpoint["location"]:
-                locations.append(each_location)
+            for each_location in each_endpoint["org_units"]:
+                locations.append({
+                    "id": each_location['id'],
+                    "name": each_location['name']
+                })
         locations = locations
         return locations
 
     def get_location_endpoint(self, location):
         for each_endpoint in self.__config["endpoints"]:
             for each_location in each_endpoint["org_units"]:
-                if location == each_location:
+                if location == each_location['id']:
                     return each_endpoint
 
     def get_reports_from_server(self):
         locations = self.get_location_for_all_endpoints()
         for each_report in self.__config["reports"]:
-            report_for_all_locations = []
             reports = []
             for location in locations:
-                location_end_point = self.get_location_endpoint(location)
+                location_end_point = self.get_location_endpoint(location['id'])
                 start_date = location_end_point['default_start_date']
                 end_date = location_end_point['default_end_date']
                 url = location_end_point["base"] + each_report["resource"]
+                data_set = each_report["dataSet"]
                 params = {
-                    "location": location
+                    "dataSet": data_set,
+                    "orgUnit": location['id'],
+                    'startDate': start_date,
+                    'endDate': end_date
                 }
-                if each_report['use_start_date_in_request']:
-                    params['startDate'] = start_date
-                if each_report['use_end_date_in_request']:
-                    params['endDate'] = end_date
+
                 print("Request for " + each_report["name"] + " for the following parameters: " + str(params))
                 get_report = requests.get(url, params=params,
                                           auth=HTTPBasicAuth(username=location_end_point["username"],
@@ -48,19 +51,14 @@ class HttpReportService:
                     print("Successful Request for " + each_report["name"])
                     report_json = json.loads(get_report.text)
 
-                    for e in report_json:
-                        e["facility_name"] = location
-                        e['start_date'] = start_date
-                        e['end_date'] = end_date
+                    for e in report_json['dataValues']:
+                        e["dataSet"] = data_set
+                        e['startDate'] = start_date
+                        e['endDate'] = end_date
                     if len(report_json) == 0:
                         print("Report is blank, please download it manually from server")
                     else:
-                        report_for_all_locations.append(report_json)
-                        reports.append(
-                            {
-                                each_report["name"]: report_for_all_locations
-                            }
-                        )
+                        reports.append(report_json)
             if len(reports) > 0:
                 self.__reports.append(reports)
 
