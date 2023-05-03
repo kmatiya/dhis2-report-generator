@@ -2,6 +2,7 @@ import pandas as pd
 from datetime import datetime
 from datetime import date
 import os
+import os.path
 
 
 class ReportGenerator:
@@ -10,6 +11,11 @@ class ReportGenerator:
         self.__config = config
 
     def get_data_frame(self):
+        today = date.today()
+        file_name = self.__config["file_name"] + '.xlsx'
+        writer = pd.ExcelWriter(file_name,
+                                engine='xlsxwriter',
+                                engine_kwargs={'options': {'strings_to_numbers': True}})
         base_location = self.__config["base_file_path"]
         data_elements_df = pd.read_csv("data_elements.csv")
         periods_df = pd.read_csv("periods.csv")
@@ -50,6 +56,6 @@ class ReportGenerator:
                             print(df_x.head())
                     report_dict.append(report)
             final_df = pd.DataFrame.from_records(report_dict)
-            final_df.to_excel(
-                self.__config["file_name"] + "-" + str(datetime.now().strftime("%Y-%m-%d-%H-%M-%S")) + '.xlsx',
-                index=False, sheet_name=report_name)
+            final_df.to_excel(writer, index=False, sheet_name=report_name)
+
+        writer.close()
