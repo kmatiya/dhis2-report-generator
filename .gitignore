@@ -79,3 +79,6 @@ __pycache__/
 Q4 Reports
 api/__pycache__/
 .idea/moh-pepfar-report-generator.iml
+.idea/misc.xml
+.idea/dhis2-report-tracker.iml
+
