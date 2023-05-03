@@ -1,4 +1,5 @@
 import pandas as pd
+from datetime import datetime
 from datetime import date
 import os
 
@@ -10,30 +11,45 @@ class ReportGenerator:
 
     def get_data_frame(self):
         base_location = self.__config["base_file_path"]
+        data_elements_df = pd.read_csv("data_elements.csv")
+        periods_df = pd.read_csv("periods.csv")
+        org_units_df = pd.read_csv("org_units.csv")
         print("Create files for each report")
         for idx, x in enumerate(self.__config["reports"]):
             report_name = str(x['name'])
-            prefix = str(x["prefix"])
-            complete_report_path = os.path.join(base_location, prefix, report_name)
+            complete_report_path = os.path.join(base_location, report_name)
             reports_by_name = self.__reports[int(idx)]
+            report_dict = []
             for index, each_report_index in enumerate(reports_by_name):
-                report_to_print = each_report_index[report_name][index]
+                report_to_print = each_report_index['dataValues']
                 report_df = pd.DataFrame.from_dict(report_to_print)
-                for each_column in x['column_names_to_rename']:
-                    key = list(each_column.keys())[0]
-                    value = each_column[key]
-                    report_df.rename(columns={key: value}, inplace=True)
-                facility = report_df['facility_name'].iat[0]
-                start_date_split = str(report_df['start_date'].iat[0]).split('-')
-                end_date_split = str(report_df['end_date'].iat[0]).split('-')
-                start_date = date(day=int(start_date_split[2]), month=int(start_date_split[1]),
-                                  year=int(start_date_split[0])).strftime("%d%b%Y")
-                end_date = date(day=int(end_date_split[2]), month=int(end_date_split[1]),
-                                year=int(end_date_split[0])).strftime("%d%b%Y")
-                report_date = start_date + " - " + end_date
-                report_df.drop(x['columns_to_remove'], axis=1, inplace=True)
-                new_file = os.path.join(complete_report_path,
-                                        prefix + ' ' + facility + ' ' + report_name + ' ' + report_date + '.csv')
-                report_df.to_csv(new_file, index=False)
-                print(
-                    prefix + ' ' + facility + ' ' + report_name + ' ' + report_date + '.csv' + " created in " + new_file)
+                print(report_df.head())
+                org_unit_id = x["org_units"][index]["id"]
+                for index, row in periods_df.iterrows():
+                    report = {
+                        "Date": row["date"],
+                        "facility":
+                            org_units_df.loc[org_units_df["Org Unit Id"] == str(org_unit_id)]["Org Unit"].iat[0]
+                    }
+                    df_x = report_df.loc[
+                        (report_df["period"] == str(row["period"])) & (report_df["orgUnit"] == str(org_unit_id))]
+                    if df_x.empty:
+                        report["report in the system"] = "No"
+                        for data_element in x["column_order"]:
+                            value = ""
+                            column_name = data_elements_df.loc[data_elements_df["Data Element Id"] == data_element][
+                                "Data Element"].iat[0]
+                            report[column_name] = value
+                    else:
+                        report["report in the system"] = "Yes"
+                        for data_element in x["column_order"]:
+                            value = df_x.loc[df_x["dataElement"] == data_element]["value"].iat[0]
+                            column_name = data_elements_df.loc[data_elements_df["Data Element Id"] == data_element][
+                                "Data Element"].iat[0]
+                            report[column_name] = value
+                            print(df_x.head())
+                    report_dict.append(report)
+            final_df = pd.DataFrame.from_records(report_dict)
+            final_df.to_excel(
+                self.__config["file_name"] + "-" + str(datetime.now().strftime("%Y-%m-%d-%H-%M-%S")) + '.xlsx',
+                index=False, sheet_name=report_name)
