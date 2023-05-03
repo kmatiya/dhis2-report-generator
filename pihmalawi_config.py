@@ -1,29 +1,46 @@
 config = {
     "base_file_path": "./DHIS2 report",
+    "file_name": "DHIS2",
     "endpoints": [
         {
-            "base": "https://neno.pih-emr.org/dhis/api",
+            "base": "",
             "username": "",
             "password": "",
+            "use_start_date_in_request": True,
+            "use_end_date_in_request": True,
+            "default_start_date": "2020-01-01",
+            "default_end_date": "2023-06-30",
             "org_units": [
                 {
                     "id": "Rmh4wKR794k",
                     "name": "Neno District Hospital"
+                },
+                {
+                    "id": "jBJ1nrUXKIu",
+                    "name": "Lisungwi Community hospital"
                 }
             ],
-            "periods": [
-                {
-                    "period":"",
-                    "reporting_format": ""
-                }
-            ]
         },
     ],
     "reports": [
         {
-            "resource": "pihmalawi/report/moh-regimen-switch",
-            "name": "Regimen Switch Report",
+            "resource": "/dataValueSets",
+            "dataSet": "XttTY8YbYKB",
+            "name": "Clerks reports",
             "assigned_to": "Bright",
+            "org_units": [
+                {
+                    "id": "Rmh4wKR794k",
+                    "name": "Neno District Hospital"
+                },
+                {
+                    "id": "jBJ1nrUXKIu",
+                    "name": "Lisungwi Community hospital"
+                }
+            ],
+            "column_order": [
+                 "NX9ITIOkqCw", "poyokFLTPMo", "WYUB8EK3P02",
+            ]
         },
     ]
 }
