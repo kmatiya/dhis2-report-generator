@@ -1,6 +1,9 @@
 config = {
     "base_file_path": "./DHIS2 report",
     "file_name": "DHIS2",
+    "data_elements_file_name": "data_elements.csv",
+    "org_units_file_name": "org_units.csv",
+    "periods_file_name": "periods.csv",
     "endpoints": [
         {
             "base": "",

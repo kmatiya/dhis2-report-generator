@@ -11,15 +11,14 @@ class ReportGenerator:
         self.__config = config
 
     def get_data_frame(self):
-        today = date.today()
         file_name = self.__config["file_name"] + '.xlsx'
         writer = pd.ExcelWriter(file_name,
                                 engine='xlsxwriter',
                                 engine_kwargs={'options': {'strings_to_numbers': True}})
         base_location = self.__config["base_file_path"]
-        data_elements_df = pd.read_csv("data_elements.csv")
-        periods_df = pd.read_csv("periods.csv")
-        org_units_df = pd.read_csv("org_units.csv")
+        data_elements_df = pd.read_csv(self.__config["data_elements_file_name"])
+        periods_df = pd.read_csv(self.__config["periods_file_name"])
+        org_units_df = pd.read_csv(self.__config["org_units_file_name"])
         print("Create files for each report")
         for idx, x in enumerate(self.__config["reports"]):
             report_name = str(x['name'])

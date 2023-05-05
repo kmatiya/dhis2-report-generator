@@ -2,6 +2,7 @@ import json
 
 import requests
 from requests.auth import HTTPBasicAuth
+from datetime import date
 
 
 class HttpReportService:
@@ -33,7 +34,7 @@ class HttpReportService:
             for location in locations:
                 location_end_point = self.get_location_endpoint(location['id'])
                 start_date = location_end_point['default_start_date']
-                end_date = location_end_point['default_end_date']
+                end_date = date.today()
                 url = location_end_point["base"] + each_report["resource"]
                 data_set = each_report["dataSet"]
                 params = {
